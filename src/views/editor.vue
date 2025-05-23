@@ -50,6 +50,13 @@
       <template #page_footer="props">
         <page-footer v-bind="props" />
       </template>
+      <template #toolbar_export>
+        <umo-menu-button
+          :ico="wordIcon"
+          :text="t('export.word')"
+          @menu-click="exportToWord"
+        />
+      </template>
     </umo-editor>
     <assistant :visible="aiConfigVisible" @close="closeAiConfig" />
   </main>
@@ -67,6 +74,8 @@
 <script setup>
 import { UmoMenuButton } from '@umoteam/editor'
 import OpenAI from 'openai'
+import { saveAs } from 'file-saver'
+import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { t, locale } from '@/composables/i18n'
 import getOptions from '@/configs/options'
 import events from '@/configs/events'
@@ -78,6 +87,51 @@ const editorRef = ref(null)
 const showEditor = ref(false)
 const showPane = ref(false)
 const paneActive = ref(0)
+
+// Word export icon
+const wordIcon = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 3H4.5C3.67157 3 3 3.67157 3 4.5V19.5C3 20.3284 3.67157 21 4.5 21H19.5C20.3284 21 21 20.3284 21 19.5V4.5C21 3.67157 20.3284 3 19.5 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7 7L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12L17 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 17L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+
+// Export to Word function
+const exportToWord = async () => {
+  try {
+    // Get document content as text
+    const content = editorRef.value.getText()
+    const title = options.value.document.title || 'Document'
+
+    // Create Word document
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: content,
+                size: 24
+              })
+            ]
+          })
+        ]
+      }]
+    })
+
+    // Generate blob
+    const blob = await Packer.toBlob(doc)
+    
+    // Save file
+    saveAs(blob, `${title}.docx`)
+
+    // Show success message
+    editorRef.value.useMessage('success', {
+      content: t('export.wordSuccess')
+    })
+  } catch (error) {
+    console.error('Export failed:', error)
+    editorRef.value.useMessage('error', {
+      content: t('export.wordError') 
+    })
+  }
+}
 
 // 设置语言
 const changeLang = (lang) => {
@@ -155,7 +209,7 @@ const onAssistantMessage = async (payload, content) => {
     messages: [
       {
         role: 'system',
-        content: `你是一个文档助手，根据用户输入的文本或者HTML内容，以及对应操作指令，生成符合要求的文档内容。要求如下：1.如果指令不是要求翻译内容，请使用${langs[lang]}返回，否则按用户要求翻译的语言返回；2.返回${output === 'rich-text' ? '富文本（HTML）' : '纯文本（剔除内容中的HTML标记）'}格式；3.如果用户输入的指令你不能理解，在返回的内容前加上“[ERROR]: ”，4.除此之外不返回任何其他多余的内容。`,
+        content: `你是一个文档助手，根据用户输入的文本或者HTML内容，以及对应操作指令，生成符合要求的文档内容。要求如下：1.如果指令不是要求翻译内容，请使用${langs[lang]}返回，否则按用户要求翻译的语言返回；2.返回${output === 'rich-text' ? '富文本（HTML）' : '纯文本（剔除内容中的HTML标记）'}格式；3.如果用户输入的指令你不能理解，在返回的内容前加上"[ERROR]: "，4.除此之外不返回任何其他多余的内容。`,
       },
       {
         role: 'user',
