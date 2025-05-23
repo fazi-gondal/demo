@@ -12,6 +12,11 @@
   "documentSaveError": "文档保存失败",
   "noUploadFile": "没有找到要上传的文件",
   "openConsole": "请手动打开浏览器控制台 (DevTools › Console) 查看输出结果。",
+  "export": {
+    "word": "导出到 Word",
+    "wordSuccess": "文档导出成功",
+    "wordError": "文档导出失败"
+  },
   "onBeforeCreate": "编辑器即将创建",
   "onCreated": "编辑器已创建",
   "onChanged": "编辑器内容已更新",
