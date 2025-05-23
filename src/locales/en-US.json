@@ -12,6 +12,11 @@
   "documentSaveError": "Failed to save the document.",
   "noUploadFile": "No file found to upload",
   "openConsole": "Please manually open the browser console (DevTools › Console) to view the output.",
+  "export": {
+    "word": "Export to Word",
+    "wordSuccess": "Document exported successfully",
+    "wordError": "Failed to export document"
+  },
   "onBeforeCreate": "Editor is about to be created.",
   "onCreated": "Editor has been created.",
   "onChanged": "Editor content has been updated.",
@@ -99,7 +104,6 @@
       "fileMaxSize": "File Size Limit (B)",
       "shareUrl": "Share Link Setting"
     },
-
     "export": "Export JSON Configuration",
     "copy": "Copy Configuration to Clipboard",
     "exportSuccess": "Current configuration information has been copied to the clipboard."
